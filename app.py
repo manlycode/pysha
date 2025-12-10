@@ -221,7 +221,7 @@ class PyshaApp(object):
 
     def save_current_settings_to_file(self):
         # NOTE: when saving device names, eliminate the last bit with XX:Y numbers as this might vary across runs
-        # if different devices are connected 
+        # if different devices are connected
         settings = {
             'midi_in_default_channel': self.midi_in_channel,
             'midi_out_default_channel': self.midi_out_channel,
@@ -365,7 +365,7 @@ class PyshaApp(object):
     def send_midi(self, msg, use_original_msg_channel=False):
         # Unless we specifically say we want to use the original msg mnidi channel, set it to global midi out channel or to the channel of the current track
         if not use_original_msg_channel and hasattr(msg, 'channel'):
-            midi_out_channel = self.midi_out_channel    
+            midi_out_channel = self.midi_out_channel
             if self.midi_out_channel == -1:
                 # Send the message to the midi channel of the currently selected track (or to track 1 if selected track has no midi channel information)
                 track_midi_channel = self.track_selection_mode.get_current_track_info()['midi_channel']
@@ -374,7 +374,7 @@ class PyshaApp(object):
                 else:
                     midi_out_channel = track_midi_channel - 1 # msg.channel is 0-indexed
             msg = msg.copy(channel=midi_out_channel)
-        
+
         if self.midi_out is not None:
             self.midi_out.send(msg)
 
@@ -395,7 +395,7 @@ class PyshaApp(object):
                     else:
                         self.last_cp_value_recevied = msg.value
                     self.last_cp_value_recevied_time = time.time()
-                    
+
                 if not skip_message:
                     # Forward message to the main MIDI out
                     self.send_midi(msg)
@@ -426,7 +426,13 @@ class PyshaApp(object):
 
     def init_push(self):
         print('Configuring Push...')
-        self.push = push2_python.Push2()
+        use_simulator = os.environ.get("PUSH_SMULATOR", False)
+
+        if use_simulator:
+          print('Using simulator...')
+          print(use_simulator)
+
+        self.push = push2_python.Push2(run_simulator=use_simulator)
         if platform.system() == "Linux":
             # When this app runs in Linux is because it is running on the Raspberrypi
             #  I've overved problems trying to reconnect many times withotu success on the Raspberrypi, resulting in
